@@ -66,9 +66,14 @@ def update_dns_record(secret=None, fqdn=None, zone_name=None, record_name=None,
                                 request=flask.request)
 
     users = names._zone.users
+
+    user_name = names.record_name
+    if user_name[-1] == ".":
+        # strip exactly one dot from the right, if present
+        user_name = user_name[:-1]
     if users:
-        expected_secret = users.get(names.record_name, None)
-        if str(expected_secret) != str(secret):
+        expected_secret = users.get(user_name, None)
+        if expected_secret is None or str(expected_secret) != str(secret):
             raise ParameterError(
                 'You specified a wrong secret key for the zone.')
     else:

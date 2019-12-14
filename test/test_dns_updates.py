@@ -68,6 +68,68 @@ class TestFunctionUpdateDnsRecord(unittest.TestCase):
         ])
         update.add.assert_called_with('www.example.com.', 300, 'a', '1.2.3.5')
 
+    @mock.patch('dns.query.tcp')
+    @mock.patch('dns.update.Update')
+    @mock.patch('dns.resolver.Resolver')
+    def test_ipv4_update_user(self, Resolver, Update, tcp):
+        resolver = Resolver.return_value
+        resolver.query.side_effect = [['1.2.3.4'], ['1.2.3.5']]
+        update = Update.return_value
+        result = update_dns_record(secret='secret1',
+                                   fqdn='user1.with-users.com',
+                                   ip_1='1.2.3.5')
+        self.assertEqual(
+            result,
+            'UPDATED: fqdn: user1.with-users.com. old_ip: 1.2.3.4 new_ip: '
+            '1.2.3.5\n',
+        )
+        update.delete.assert_has_calls([
+            mock.call('user1.with-users.com.', 'a'),
+            mock.call('user1.with-users.com.', 'aaaa'),
+        ])
+        update.add.assert_called_with(
+            'user1.with-users.com.', 300, 'a', '1.2.3.5')
+
+    def test_users_wrong_secret(self):
+        self.assertRaisesMsg(
+            {'secret': 'secret11', 'fqdn': 'user1.with-users.com',
+             'ip_1': '1.2.3.4'},
+            ParameterError,
+            'You specified a wrong secret key for the zone.',
+        )
+        self.assertRaisesMsg(
+            {'secret': None, 'fqdn': 'user1.with-users.com',
+             'ip_1': '1.2.3.4'},
+            ParameterError,
+            'You specified a wrong secret key for the zone.',
+        )
+        self.assertRaisesMsg(
+            {'secret': '1234', 'fqdn': 'usernotexist.with-users.com',
+             'ip_1': '1.2.3.4'},
+            ParameterError,
+            'You specified a wrong secret key for the zone.',
+        )
+        self.assertRaisesMsg(
+            {'secret': None, 'fqdn': 'usernotexist.with-users.com',
+             'ip_1': '1.2.3.4'},
+            ParameterError,
+            'You specified a wrong secret key for the zone.',
+        )
+
+    def test_users_no_global(self):
+        self.assertRaisesMsg(
+            {'secret': '12345678', 'fqdn': 'usernotexist.with-users.com',
+             'ip_1': '1.2.3.4'},
+            ParameterError,
+            'You specified a wrong secret key for the zone.',
+        )
+        self.assertRaisesMsg(
+            {'secret': '12345678', 'fqdn': 'user1.with-users.com',
+             'ip_1': '1.2.3.4'},
+            ParameterError,
+            'You specified a wrong secret key for the zone.',
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

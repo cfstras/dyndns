@@ -60,7 +60,7 @@ def validate_users(users):
         raise NamesError("""Users must be a dict:
 user1: 1234
 user2: 4321
-""" )
+""")
     return users
 
 

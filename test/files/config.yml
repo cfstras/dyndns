@@ -5,3 +5,7 @@ dyndns_domain: example.com
 zones:
   - name: example.com
     tsig_key: tPyvZA==
+  - name: with-users.com
+    tsig_key: otherKey
+    users:
+      user1: secret1
