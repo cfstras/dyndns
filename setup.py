@@ -36,6 +36,7 @@ setup(
         'Pygments',
         'PyYAML',
     ],
+    setup_requires=['wheel'],
     tests_require=[
         'beautifulsoup4',
     ],
