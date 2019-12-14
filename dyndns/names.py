@@ -36,7 +36,7 @@ def validate_hostname(hostname):
 
     allowed = re.compile(r"(?!-)[a-z0-9-]{1,63}(?<!-)$", re.IGNORECASE)
     for label in labels:
-        if not allowed.match(label):
+        if not allowed.match(label) and label != '@':
             raise NamesError(
                 'The label "{}" of the hostname "{}" is invalid.'
                 .format(label, hostname)
