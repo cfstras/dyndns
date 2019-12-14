@@ -55,11 +55,20 @@ def validate_tsig_key(tsig_key):
         raise NamesError('Invalid tsig key: "{}".'.format(tsig_key))
 
 
+def validate_users(users):
+    if not type(users) == dict:
+        raise NamesError("""Users must be a dict:
+user1: 1234
+user2: 4321
+""")
+
+
 class Zone:
 
-    def __init__(self, zone_name, tsig_key):
+    def __init__(self, zone_name, tsig_key, users={}):
         self.zone_name = validate_hostname(zone_name)
         self.tsig_key = validate_tsig_key(tsig_key)
+        self.users = validate_users(users)
 
     def split_fqdn(self, fqdn):
         """Split hostname into record_name and zone_name
@@ -83,7 +92,8 @@ class Zones:
         for zone_config in zones_config:
             zone = Zone(
                 zone_name=zone_config['name'],
-                tsig_key=zone_config['tsig_key']
+                tsig_key=zone_config['tsig_key'],
+                users=zone_config['users'] if 'users' in zone_config else {}
             )
             self.zones[zone.zone_name] = zone
 

@@ -91,13 +91,10 @@ def validate_config(config=None):
                                  '"tsig_key: tPyvZA=="')
 
     for zone in config['zones']:
-        if 'name' not in zone:
-            raise ConfigurationError('Your zone dictionary must contain a key '
-                                     '"name"')
-
-        if 'tsig_key' not in zone:
-            raise ConfigurationError('Your zone dictionary must contain a key '
-                                     '"tsig_key"')
+        for key in ['name', 'tsig_key']:
+            if key not in zone:
+                raise ConfigurationError('Your zone dictionary must contain a '
+                                         'key "'+key+'"')
 
     try:
         config['zones'] = Zones(config['zones'])

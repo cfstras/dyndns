@@ -59,13 +59,21 @@ def update_dns_record(secret=None, fqdn=None, zone_name=None, record_name=None,
 
     zones = config['zones']
 
-    authenticate(secret, config)
-
     names = parameter_err(Names, NamesError, zones, fqdn=fqdn,
                           zone_name=zone_name, record_name=record_name)
     ipaddresses = parameter_err(IpAddresses, IpAddressesError, ip_1=ip_1,
                                 ip_2=ip_2, ipv4=ipv4, ipv6=ipv6,
                                 request=flask.request)
+
+    users = names._zone.users
+    expected_secret = secret
+    if users:
+        expected_secret = users.get(names.record_name, None)
+        if not expected_secret:
+            raise ParameterError(
+                'You specified a wrong secret key for the zone.')
+
+    authenticate(expected_secret, config)
 
     update = jf_dns.DnsUpdate(
         nameserver=config['nameserver'],
