@@ -15,6 +15,18 @@ import inspect
 
 app = flask.Flask(__name__)
 
+config = None
+
+
+def load_config():
+    global config
+    if not config:
+        try:
+            config = get_config()
+        except Exception:
+            pass
+    return config
+
 
 @app.route('/update-by-path/<secret>/<fqdn>')
 @app.route('/update-by-path/<secret>/<fqdn>/<ip_1>')
@@ -53,16 +65,13 @@ def delete_by_path(secret, fqdn, ip_1=None, ip_2=None):
 
 @app.route('/')
 def home():
-    config = False
-    try:
-        config = get_config()
-    except Exception:
-        pass
-
+    config = load_config()
     if not config:
         configuration = RestructuredText.read_to_html('configuration.rst')
     else:
         configuration = ''
+        if not config['web']:
+            return ""
 
     content = flask.render_template(
         'home.html',
@@ -75,6 +84,8 @@ def home():
 
 @app.route('/about')
 def about():
+    if not get_config()['web']:
+        return ""
     return template_base(
         'About',
         RestructuredText.read_to_html('about.rst', remove_heading=True),
@@ -83,6 +94,8 @@ def about():
 
 @app.route('/docs/installation')
 def docs_installation():
+    if not get_config()['web']:
+        return ""
     return template_base(
         'Installation',
         RestructuredText.read_to_html('installation.rst', remove_heading=True),
@@ -91,6 +104,8 @@ def docs_installation():
 
 @app.route('/docs/configuration')
 def docs_configuration():
+    if not get_config()['web']:
+        return ""
     return template_base(
         'Configuration',
         RestructuredText.read_to_html('configuration.rst',
@@ -100,11 +115,15 @@ def docs_configuration():
 
 @app.route('/docs/usage')
 def docs_usage():
+    if not get_config()['web']:
+        return ""
     return template_base('Usage', template_usage(remove_heading=True))
 
 
 @app.route('/statistics/updates-by-fqdn')
 def statistics_updates_by_fqdn():
+    if not get_config()['web']:
+        return ""
     db = UpdatesDB()
 
     out = []
@@ -119,6 +138,8 @@ def statistics_updates_by_fqdn():
 
 @app.route('/statistics/latest-submissions')
 def statistics_latest_submissions():
+    if not get_config()['web']:
+        return ""
     db = UpdatesDB()
     results = []
     db.cursor.execute('SELECT * FROM updates ORDER BY update_time DESC '

@@ -61,6 +61,13 @@ def validate_config(config=None):
 
     config['secret'] = validate_secret(config['secret'])
 
+    if 'web' in config:
+        if type(config['web']) != bool:
+            raise ConfigurationError('Your configuration must have a "web" '
+                                     'key, for example: "web: true"')
+    else:
+        config['web'] = True
+
     if 'nameserver' not in config:
         raise ConfigurationError('Your configuration must have a "nameserver" '
                                  'key, for example: "nameserver: 127.0.0.1"')

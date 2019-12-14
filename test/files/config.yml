@@ -2,6 +2,7 @@
 secret: 12345678
 nameserver: 127.0.0.1
 dyndns_domain: example.com
+web: true
 zones:
   - name: example.com
     tsig_key: tPyvZA==
