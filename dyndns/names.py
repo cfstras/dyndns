@@ -60,7 +60,8 @@ def validate_users(users):
         raise NamesError("""Users must be a dict:
 user1: 1234
 user2: 4321
-""")
+""" )
+    return users
 
 
 class Zone:
@@ -158,4 +159,4 @@ class Names:
 
         self._zone = self._zones.get_zone_by_name(self.zone_name)
         self.tsig_key = self._zone.tsig_key
-        """The twig key (e. g. ``tPyvZA==``)"""
+        """The tsig key (e. g. ``tPyvZA==``)"""
